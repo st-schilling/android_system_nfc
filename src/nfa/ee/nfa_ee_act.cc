@@ -1310,7 +1310,7 @@ void nfa_ee_api_remove_aid(tNFA_EE_MSG* p_data) {
     /* report NFA_EE_REMOVE_AID_EVT to the callback associated the NFCEE */
     p_cback = p_cb->p_ee_cback;
   } else {
-    LOG(ERROR) << StringPrintf(
+    LOG(WARNING)  << StringPrintf(
         "nfa_ee_api_remove_aid The AID entry is not in the database");
     evt_data.status = NFA_STATUS_INVALID_PARAM;
   }
@@ -1639,6 +1639,20 @@ void nfa_ee_api_disconnect(tNFA_EE_MSG* p_data) {
   }
   evt_data.handle = (tNFA_HANDLE)p_cb->nfcee_id | NFA_HANDLE_GROUP_EE;
   nfa_ee_report_event(p_cb->p_ee_cback, NFA_EE_DISCONNECT_EVT, &evt_data);
+}
+
+/*******************************************************************************
+**
+** Function         nfa_ee_api_pwr_and_link_ctrl
+**
+** Description      Initiates closing of the connection to the given NFCEE
+**
+** Returns          void
+**
+*******************************************************************************/
+void nfa_ee_api_pwr_and_link_ctrl(tNFA_EE_MSG* p_data) {
+  NFC_NfceePLConfig(p_data->pwr_and_link_ctrl.nfcee_id,
+                    p_data->pwr_and_link_ctrl.config);
 }
 
 /*******************************************************************************
@@ -2078,7 +2092,7 @@ static void nfa_ee_build_discover_req_evt(tNFA_EE_DISCOVER_REQ* p_evt_data) {
 
   for (xx = 0; xx < nfa_ee_cb.cur_ee; xx++, p_cb++) {
     if ((p_cb->ee_status & NFA_EE_STATUS_INT_MASK) ||
-        (p_cb->ee_status != NFA_EE_STATUS_ACTIVE)) {
+        (p_cb->ee_status != NFA_EE_STATUS_ACTIVE) ) {
       continue;
     }
     p_info->ee_handle = (tNFA_HANDLE)p_cb->nfcee_id | NFA_HANDLE_GROUP_EE;
@@ -2151,8 +2165,8 @@ void nfa_ee_nci_mode_set_rsp(tNFA_EE_MSG* p_data) {
     /* Start routing table update debounce timer */
     nfa_ee_start_timer();
   }
-  LOG(ERROR) << StringPrintf("%s p_rsp->status:0x%02x", __func__,
-                             p_rsp->status);
+  LOG(WARNING) << StringPrintf("%s p_rsp->status:0x%02x", __func__,
+                               p_rsp->status);
   if (p_rsp->status == NFA_STATUS_OK) {
     if (p_rsp->mode == NFA_EE_MD_ACTIVATE) {
       p_cb->ee_status = NFC_NFCEE_STATUS_ACTIVE;
@@ -2257,6 +2271,23 @@ void nfa_ee_nci_wait_rsp(tNFA_EE_MSG* p_data) {
     if (p_rsp->opcode == NCI_MSG_RF_SET_ROUTING) nfa_ee_cb.wait_rsp--;
   }
   nfa_ee_report_update_evt();
+}
+
+/*******************************************************************************
+**
+** Function         nfa_ee_pwr_and_link_ctrl_rsp
+**
+** Description      Process the result for NCI response
+**
+** Returns          void
+**
+*******************************************************************************/
+void nfa_ee_pwr_and_link_ctrl_rsp(tNFA_EE_MSG* p_data) {
+  tNFA_EE_CBACK_DATA evt_data;
+  if (p_data != nullptr) {
+    evt_data.status = NFA_STATUS_OK;
+    nfa_ee_report_event(nullptr, NFA_EE_PWR_AND_LINK_CTRL_EVT, &evt_data);
+  }
 }
 
 /*******************************************************************************
