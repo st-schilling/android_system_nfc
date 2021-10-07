@@ -494,6 +494,8 @@ typedef struct {
 #define RW_T3T_FL_W4_FMT_FELICA_LITE_POLL_RSP 0x10
 /* Waiting for POLL response for RW_T3tSetReadOnly */
 #define RW_T3T_FL_W4_SRO_FELICA_LITE_POLL_RSP 0x20
+/* Waiting for POLL response for RW_T3tPoll */
+#define RW_T3T_FL_W4_USER_POLL_RSP 0x40
 
 typedef struct {
   uint32_t cur_tout; /* Current command timeout */
@@ -739,8 +741,19 @@ typedef union {
   tRW_MFC_CB mfc;
 } tRW_TCB;
 
+/* RW callback type */
+#define RW_CB_TYPE_UNKNOWN 0
+#define RW_CB_TYPE_T1T 1
+#define RW_CB_TYPE_T2T 2
+#define RW_CB_TYPE_T3T 3
+#define RW_CB_TYPE_T4T 4
+#define RW_CB_TYPE_T5T 5
+#define RW_CB_TYPE_MIFARE 6
+typedef uint8_t tRW_CB_TYPE;
+
 /* RW control blocks */
 typedef struct {
+  tRW_CB_TYPE tcb_type;
   tRW_TCB tcb;
   tRW_CBACK* p_cback;
   uint32_t cur_retry; /* Retry count for the current operation */
