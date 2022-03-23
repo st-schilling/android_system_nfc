@@ -694,9 +694,7 @@ static void rw_mfc_conn_cback(uint8_t conn_id, tNFC_CONN_EVT event,
   }
 
   if ((p_mfc->state != RW_MFC_STATE_IDLE) && (mfc_data == NULL)) {
-    if (p_mfc->state != RW_MFC_STATE_NOT_ACTIVATED) {
-      LOG(ERROR) << StringPrintf("%s NULL pointer", __func__);
-    }
+    LOG(ERROR) << StringPrintf("%s NULL pointer", __func__);
     return;
   }
 
@@ -973,19 +971,20 @@ static void rw_mfc_handle_tlv_detect_rsp(uint8_t* p_data) {
  *******************************************************************************/
 static void rw_mfc_resume_op() {
   tRW_MFC_CB* p_mfc = &rw_cb.tcb.mfc;
+  bool status = true;
 
   switch (p_mfc->state) {
     case RW_MFC_STATE_DETECT_TLV:
-      rw_mfc_readBlock(p_mfc->next_block.block);
+      status = rw_mfc_readBlock(p_mfc->next_block.block);
       break;
     case RW_MFC_STATE_READ_NDEF:
-      rw_mfc_readBlock(p_mfc->next_block.block);
+      status = rw_mfc_readBlock(p_mfc->next_block.block);
       break;
     case RW_MFC_STATE_NDEF_FORMAT:
-      rw_mfc_formatBlock(p_mfc->next_block.block);
+      status = rw_mfc_formatBlock(p_mfc->next_block.block);
       break;
     case RW_MFC_STATE_UPDATE_NDEF:
-      rw_mfc_writeBlock(p_mfc->next_block.block);
+      status = rw_mfc_writeBlock(p_mfc->next_block.block);
       break;
   }
 }
