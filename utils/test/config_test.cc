@@ -16,12 +16,9 @@
 #include <gtest/gtest.h>
 
 #include <config.h>
-#include <filesystem>
 
 namespace {
-const std::filesystem::path kConfigFile =
-    std::filesystem::temp_directory_path() / "test_config.conf";
-const char* SIMPLE_CONFIG_FILE = kConfigFile.c_str();
+const char SIMPLE_CONFIG_FILE[] = "/data/local/tmp/test_config.conf";
 const char SIMPLE_CONFIG[] =
     "# Simple config file test\n\
 STRING_VALUE=\"Hello World!\"\n\
@@ -62,9 +59,6 @@ class ConfigTestFromFile : public ::testing::Test {
     FILE* fp = fopen(SIMPLE_CONFIG_FILE, "wt");
     fwrite(SIMPLE_CONFIG, 1, sizeof(SIMPLE_CONFIG), fp);
     fclose(fp);
-  }
-  void TearDown() override {
-    std::filesystem::remove(kConfigFile);
   }
 };
 
